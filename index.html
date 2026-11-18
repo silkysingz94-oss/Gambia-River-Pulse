@@ -1,0 +1,1318 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GBoS GEOAI | The Gambia River Pulse</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --navy:#10243a;--blue:#1769aa;--cyan:#12a9c7;
+  --bg:#f1f5f9;--border:#dfe7ef;--muted:#687b8e;
+  --green:#16845b;--orange:#d88728;--purple:#8056aa;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);font-family:Inter,Arial,sans-serif;color:#203044;font-size:13px}
+header{
+  min-height:76px;background:var(--navy);color:white;padding:12px 20px;
+  display:flex;align-items:center;justify-content:space-between;gap:15px
+}
+.brand{display:flex;align-items:center;gap:12px}
+.brand-icon{
+  width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
+  background:linear-gradient(135deg,#14b4c9,#1769aa);font-size:23px
+}
+.brand h1{font-size:17px;margin:0 0 4px;font-weight:800}
+.brand p{font-size:10px;color:#c4d6e7;margin:0}
+.header-tags{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tag{border:1px solid #486078;border-radius:20px;padding:7px 10px;font-size:9px;color:#e0edf7}
+#headerStatus{font-size:10px;color:#c7d8e8}
+main{
+  display:grid;grid-template-columns:minmax(260px,1fr) minmax(370px,1.2fr) minmax(280px,1fr);
+  gap:12px;padding:12px;height:calc(100vh - 76px);min-height:680px
+}
+.panel{background:white;border:1px solid var(--border);border-radius:11px;overflow:hidden;display:flex;flex-direction:column;min-width:0;box-shadow:0 3px 12px #17324a0b}
+.panel-head{padding:13px 15px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+.panel-head h2{font-size:12px;margin:0;color:var(--navy);font-weight:800}
+.panel-head span{font-size:9px;color:var(--muted)}
+.panel-body{padding:13px;overflow-y:auto;min-height:0}
+.section{font-size:10px;font-weight:800;letter-spacing:.7px;text-transform:uppercase;color:#62788c;margin:4px 0 9px}
+.field{margin-bottom:11px}
+label{display:block;font-size:10px;font-weight:700;margin-bottom:5px;color:#42566b}
+input,select{
+  width:100%;padding:9px;border:1px solid #d7e0e9;border-radius:7px;
+  font:inherit;font-size:11px;background:white;color:#24384b
+}
+input[type=checkbox]{width:auto;accent-color:var(--blue)}
+input[type=file]{font-size:10px}
+.date-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn-row{display:flex;gap:7px;flex-wrap:wrap}
+button{border:0;border-radius:7px;padding:10px 12px;font-size:10px;font-weight:800;cursor:pointer}
+button:disabled{opacity:.5;cursor:not-allowed}
+.primary{background:var(--blue);color:white;flex:1}
+.secondary{background:#eaf1f7;color:#29465e}
+.green-btn{background:#e5f4ed;color:#14734f}
+.note{
+  padding:10px;background:#f2f7fb;border:1px solid #dce8f2;
+  border-radius:8px;color:#52687c;font-size:10px;line-height:1.55
+}
+.note.warn{background:#fff8ec;border-color:#f0dfbf;color:#805b20}
+.station-list{display:grid;gap:6px}
+.station-item{
+  display:flex;align-items:center;gap:8px;padding:8px;
+  border:1px solid var(--border);border-radius:7px
+}
+.dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.station-item strong{font-size:10px}
+.station-item small{display:block;color:var(--muted);font-size:9px;margin-top:3px}
+.station-item input{margin-left:auto}
+.check-row{display:flex;gap:8px;align-items:center;margin:8px 0;font-size:10px;color:#42566b}
+.progress{height:5px;background:#e8edf3;border-radius:10px;overflow:hidden;margin-top:8px}
+.progress div{height:100%;width:0;background:var(--cyan);transition:width .3s}
+#message{font-size:10px;color:#52687c;line-height:1.5;margin-top:9px}
+#map{height:100%;width:100%;min-height:350px}
+.map-wrap{position:relative;flex:1;min-height:350px}
+.map-legend{
+  position:absolute;z-index:500;bottom:14px;left:12px;background:white;
+  padding:10px 12px;border-radius:8px;box-shadow:0 2px 10px #0002;
+  font-size:9px;line-height:1.9
+}
+.legend-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px}
+.map-caption{padding:9px 12px;border-top:1px solid var(--border);font-size:9px;color:var(--muted);line-height:1.5}
+.analytics-body{padding:12px;overflow-y:auto;min-height:0}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.kpi{border:1px solid var(--border);border-radius:8px;padding:10px;min-height:75px}
+.kpi small{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase}
+.kpi strong{display:block;font-size:19px;color:var(--navy);margin-top:8px}
+.kpi span{font-size:9px;color:var(--muted)}
+.chart-card{border:1px solid var(--border);border-radius:8px;padding:10px;margin-top:10px}
+.chart-title{font-size:10px;font-weight:800;color:var(--navy);margin-bottom:8px}
+.chart-box{height:190px;position:relative}
+.chart-box.tall{height:220px}
+.table-wrap{overflow:auto;max-height:240px}
+table{border-collapse:collapse;width:100%;font-size:9px}
+td,th{padding:7px 5px;border-bottom:1px solid #edf1f5;text-align:left;white-space:nowrap}
+th{background:#f5f8fb;color:#64788c;font-size:8px;text-transform:uppercase}
+footer{padding:10px 15px;background:white;border-top:1px solid var(--border);font-size:9px;color:#64788c;line-height:1.6}
+footer strong{color:#263d55}
+
+/* Animated river line */
+.river-flow{
+  animation:riverDash 1.15s linear infinite;
+}
+@keyframes riverDash{
+  from{stroke-dashoffset:0}
+  to{stroke-dashoffset:-52}
+}
+.river-glow{filter:drop-shadow(0 0 4px #18b8d7)}
+.river-pulse{
+  animation:pulse 1.8s ease-in-out infinite;
+  transform-box:fill-box;transform-origin:center
+}
+@keyframes pulse{
+  0%,100%{opacity:.45;transform:scale(.8)}
+  50%{opacity:1;transform:scale(1.5)}
+}
+.settlement-label{
+  background:#fff;border:1px solid #d5e0e9;border-radius:4px;
+  padding:2px 4px;font:700 9px Inter,Arial;color:#263c51;
+  box-shadow:0 1px 4px #0002
+}
+.station-label{
+  background:#eaf5ff;border:1px solid #8bb9df;border-radius:4px;
+  padding:2px 4px;font:800 9px Inter,Arial;color:#15558b
+}
+@media(max-width:1050px){
+  main{height:auto;grid-template-columns:1fr 1fr}
+  .map-panel{grid-column:1/-1;grid-row:1;min-height:530px}
+  .panel{min-height:520px}
+}
+@media(max-width:650px){
+  header{align-items:flex-start;flex-direction:column}
+  .header-tags{display:none}
+  main{display:flex;flex-direction:column;height:auto;padding:8px}
+  .panel{min-height:0}
+  .map-panel{height:500px}
+  .map-wrap{min-height:410px}
+  .analytics-panel{min-height:700px}
+}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="brand">
+    <div class="brand-icon">🌊</div>
+    <div>
+      <h1>THE GAMBIA RIVER PULSE</h1>
+      <p>GBoS GEOAI • River Network, Settlements & Hydrological Intelligence</p>
+    </div>
+  </div>
+  <div class="header-tags">
+    <span class="tag">GLOFAS MODEL DATA</span>
+    <span class="tag">RIVER CORRIDOR</span>
+    <span id="headerStatus">Initialising</span>
+  </div>
+</header>
+
+<main>
+<!-- LEFT: CONTROLS -->
+<section class="panel">
+  <div class="panel-head">
+    <h2>01. Controls & Data</h2><span>Dashboard controls</span>
+  </div>
+  <div class="panel-body">
+
+    <div class="section">River network</div>
+    <div class="note">
+      The dashboard attempts to retrieve the mapped Gambia River waterway
+      from OpenStreetMap. If the service is unavailable, a generalised
+      reference line is displayed instead.
+    </div>
+
+    <div style="height:12px"></div>
+    <div class="section">Map layers</div>
+    <label class="check-row"><input type="checkbox" id="showRiver" checked> Show Gambia River path</label>
+    <label class="check-row"><input type="checkbox" id="animateRiver" checked> Animate river flow effect</label>
+    <label class="check-row"><input type="checkbox" id="showSettlements" checked> Show settlements</label>
+    <label class="check-row"><input type="checkbox" id="showStations" checked> Show GloFAS query locations</label>
+
+    <div style="height:12px"></div>
+    <div class="section">Five discharge query locations</div>
+    <div class="station-list" id="stationList"></div>
+
+    <div style="height:14px"></div>
+    <div class="section">Analysis period</div>
+    <div class="date-grid">
+      <div class="field">
+        <label for="startDate">Start date</label>
+        <input type="date" id="startDate" value="2020-01-01">
+      </div>
+      <div class="field">
+        <label for="endDate">End date</label>
+        <input type="date" id="endDate">
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="stationFilter">Discharge location</label>
+      <select id="stationFilter"><option value="All">All five locations</option></select>
+    </div>
+    <div class="field">
+      <label for="aggregation">Time-series aggregation</label>
+      <select id="aggregation">
+        <option value="daily">Daily</option>
+        <option value="monthly" selected>Monthly mean</option>
+        <option value="annual">Annual mean</option>
+      </select>
+    </div>
+
+    <div class="btn-row">
+      <button class="primary" id="fetchBtn">Fetch GloFAS data</button>
+      <button class="secondary" id="resetBtn">Reset</button>
+    </div>
+    <div class="progress"><div id="progressBar"></div></div>
+    <div id="message">Ready to retrieve modelled discharge.</div>
+
+    <div style="height:17px"></div>
+    <div class="section">Alternative CSV data</div>
+    <div class="field">
+      <label for="csvFile">Upload observation / model CSV</label>
+      <input type="file" id="csvFile" accept=".csv,text/csv">
+    </div>
+    <div class="note">
+      Required: <b>date</b>, <b>discharge_m3s</b>.<br>
+      Optional: station, water_temp_c, water_level_m, salinity_ppt,
+      longitude, latitude, source, data_type.
+    </div>
+    <div class="btn-row" style="margin-top:9px">
+      <button class="secondary" id="templateBtn">CSV template</button>
+      <button class="green-btn" id="exportBtn">Export CSV</button>
+    </div>
+
+    <div style="height:15px"></div>
+    <div class="section">Basemap</div>
+    <select id="basemap">
+      <option value="street">Street map</option>
+      <option value="satellite">Satellite imagery</option>
+      <option value="terrain">Terrain</option>
+    </select>
+
+    <div style="height:14px"></div>
+    <div class="section">Important data note</div>
+    <div class="note warn">
+      The five discharge query locations are approximate API query points,
+      not confirmed national hydrometric stations. GloFAS values are
+      modelled estimates. Settlement markers are reference locations and
+      do not represent monitoring stations.
+    </div>
+  </div>
+</section>
+
+<!-- CENTRE: MAP -->
+<section class="panel map-panel">
+  <div class="panel-head">
+    <h2>02. Gambia River Network & Settlements</h2>
+    <span id="riverSourceLabel">River geometry loading</span>
+  </div>
+  <div class="map-wrap">
+    <div id="map"></div>
+    <div class="map-legend">
+      <div><span class="legend-dot" style="background:#087fa9"></span>Gambia River</div>
+      <div><span class="legend-dot" style="background:#d88728"></span>Settlement</div>
+      <div><span class="legend-dot" style="background:#1769aa"></span>GloFAS query location</div>
+      <div><span class="legend-dot" style="background:#13b8d2"></span>Animated flow effect</div>
+    </div>
+  </div>
+  <div class="map-caption">
+    The river is displayed from the eastern part of The Gambia towards its
+    Atlantic outlet. The moving line is a cartographic animation, not a
+    measured current-speed or flood-propagation model.
+  </div>
+</section>
+
+<!-- RIGHT: ANALYTICS -->
+<section class="panel analytics-panel">
+  <div class="panel-head">
+    <h2>03. Hydrological Analytics</h2><span>Discharge analysis</span>
+  </div>
+  <div class="analytics-body">
+    <div class="kpis">
+      <div class="kpi"><small>Latest discharge</small><strong id="kLatest">—</strong><span>m³/s</span></div>
+      <div class="kpi"><small>Period mean</small><strong id="kMean">—</strong><span>m³/s</span></div>
+      <div class="kpi"><small>Maximum discharge</small><strong id="kMax">—</strong><span>m³/s</span></div>
+      <div class="kpi"><small>Valid records</small><strong id="kRecords">0</strong><span>records</span></div>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-title">River discharge time series</div>
+      <div class="chart-box tall"><canvas id="seriesChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Mean monthly discharge pattern</div>
+      <div class="chart-box"><canvas id="seasonChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Mean discharge by query location</div>
+      <div class="chart-box"><canvas id="stationChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Latest records</div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Location</th><th>m³/s</th><th>Type</th></tr></thead>
+          <tbody id="recordsTable"><tr><td colspan="4">No data loaded.</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Data source & methodology</div>
+      <div class="note">
+        <b>Discharge source:</b> Open-Meteo Global Flood API / Copernicus GloFAS.<br>
+        <b>Variable:</b> Daily river discharge in m³/s.<br>
+        <b>River geometry:</b> OpenStreetMap waterway features where available.<br>
+        <b>Settlements:</b> Geographic reference points for towns along or near the river corridor.<br>
+        <b>Processing:</b> Daily, monthly and annual mean summaries are calculated from available records.<br>
+        <b>Limitations:</b> Modelled discharge is not a substitute for observed river-gauge data. Water temperature, water level and salinity are not supplied by this discharge request.
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <strong>Produced by Ansu Singhateh</strong> |
+  GIS Analyst | GIS / Cartography Unit | Gambia Bureau of Statistics<br>
+  GBoS GEOAI • Research and educational use
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<script>
+"use strict";
+
+/* =========================================================
+   1. CONFIGURATION
+========================================================= */
+
+const FLOOD_API = "https://flood-api.open-meteo.com/v1/flood";
+
+const STATIONS = [
+  {name:"Basse",lat:13.3097,lon:-14.2130,color:"#1769aa"},
+  {name:"Janjanbureh",lat:13.5380,lon:-14.7670,color:"#13a8c7"},
+  {name:"Kuntaur",lat:13.6700,lon:-14.8900,color:"#16845b"},
+  {name:"Kaur",lat:13.6900,lon:-15.2800,color:"#d88728"},
+  {name:"Tendaba",lat:13.4330,lon:-15.8000,color:"#8056aa"}
+];
+
+/*
+  Settlement coordinates are approximate map reference points.
+  They are not hydrometric stations and are not intended to
+  define the precise riverbank.
+*/
+const SETTLEMENTS = [
+  {name:"Banjul",lat:13.4549,lon:-16.5790,group:"Capital"},
+  {name:"Barra",lat:13.4890,lon:-16.5450,group:"North Bank"},
+  {name:"Bakau",lat:13.4780,lon:-16.6810,group:"Western"},
+  {name:"Lamin",lat:13.3520,lon:-16.4330,group:"Western"},
+  {name:"Essau",lat:13.4840,lon:-16.5350,group:"North Bank"},
+  {name:"Albreda",lat:13.3330,lon:-16.3730,group:"North Bank"},
+  {name:"Juffureh",lat:13.3160,lon:-16.3740,group:"North Bank"},
+  {name:"Kerewan",lat:13.4900,lon:-16.1000,group:"North Bank"},
+  {name:"Farafenni",lat:13.5700,lon:-15.6100,group:"North Bank"},
+  {name:"Soma",lat:13.4330,lon:-15.5350,group:"Lower River"},
+  {name:"Mansa Konko",lat:13.3850,lon:-15.7350,group:"Lower River"},
+  {name:"Tendaba",lat:13.4330,lon:-15.8000,group:"Lower River"},
+  {name:"Kaur",lat:13.6900,lon:-15.2800,group:"Central River"},
+  {name:"Kuntaur",lat:13.6560,lon:-14.9260,group:"Central River"},
+  {name:"Wassu",lat:13.6900,lon:-14.8780,group:"Central River"},
+  {name:"Janjanbureh",lat:13.5400,lon:-14.7640,group:"Central River"},
+  {name:"Bansang",lat:13.4330,lon:-14.6500,group:"Central River"},
+  {name:"Basse",lat:13.3100,lon:-14.2300,group:"Upper River"},
+  {name:"Fatoto",lat:13.2900,lon:-13.9800,group:"Upper River"},
+  {name:"Sabi",lat:13.2400,lon:-14.1800,group:"Upper River"},
+  {name:"Gambissara",lat:13.2400,lon:-14.3200,group:"Upper River"},
+  {name:"Bansang Wharf",lat:13.4350,lon:-14.6400,group:"Central River"},
+  {name:"Karantaba",lat:13.5100,lon:-15.0000,group:"Central River"},
+  {name:"Kudang",lat:13.5700,lon:-14.9700,group:"Central River"},
+  {name:"Pacharr",lat:13.5700,lon:-14.9000,group:"Central River"},
+  {name:"Bintang",lat:13.5000,lon:-16.2500,group:"Western River Corridor"}
+];
+
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+let glofasRecords=[];
+let uploadedRecords=[];
+let activeSource="glofas";
+let charts={};
+let map;
+let riverLayer=L.layerGroup();
+let settlementLayer=L.layerGroup();
+let stationLayer=L.layerGroup();
+let riverPaths=[];
+let riverIsAnimated=true;
+let riverVisible=true;
+
+/* =========================================================
+   2. DATE AND UI HELPERS
+========================================================= */
+
+const today=new Date();
+const yesterday=new Date(today);
+yesterday.setDate(yesterday.getDate()-1);
+
+function isoDate(d){return d.toISOString().slice(0,10)}
+document.getElementById("endDate").value=isoDate(yesterday);
+
+function setStatus(message,progress){
+  document.getElementById("message").textContent=message;
+  document.getElementById("headerStatus").textContent=message;
+  if(progress!==undefined){
+    document.getElementById("progressBar").style.width=
+      Math.max(0,Math.min(100,progress))+"%";
+  }
+}
+
+function num(v){
+  if(v===null||v===undefined||v==="")return null;
+  const n=Number(v);
+  return Number.isFinite(n)?n:null;
+}
+
+function fmt(v){
+  return Number.isFinite(v)
+    ?v.toLocaleString(undefined,{maximumFractionDigits:1})
+    :"—";
+}
+
+function esc(v){
+  return String(v??"").replace(/[&<>"']/g,c=>({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+  })[c]);
+}
+
+/* =========================================================
+   3. BUILD CONTROLS
+========================================================= */
+
+function buildControls(){
+  const list=document.getElementById("stationList");
+  const filter=document.getElementById("stationFilter");
+
+  STATIONS.forEach(s=>{
+    const div=document.createElement("div");
+    div.className="station-item";
+    div.innerHTML=`
+      <span class="dot" style="background:${s.color}"></span>
+      <div><strong>${esc(s.name)}</strong>
+      <small>${s.lat.toFixed(4)}, ${s.lon.toFixed(4)}</small></div>
+      <input type="checkbox" checked data-station="${esc(s.name)}">
+    `;
+    list.appendChild(div);
+
+    const option=document.createElement("option");
+    option.value=s.name;
+    option.textContent=s.name;
+    filter.appendChild(option);
+  });
+}
+
+function selectedStations(){
+  const names=[...document.querySelectorAll("[data-station]:checked")]
+    .map(el=>el.dataset.station);
+  return STATIONS.filter(s=>names.includes(s.name));
+}
+
+/* =========================================================
+   4. MAP AND BASEMAPS
+========================================================= */
+
+const baseLayers={
+  street:L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{
+    maxZoom:19,attribution:"© OpenStreetMap"
+  }),
+  satellite:L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{
+    maxZoom:19,attribution:"Tiles © Esri"
+  }),
+  terrain:L.tileLayer("https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",{
+    maxZoom:17,attribution:"© OpenTopoMap"
+  })
+};
+
+function initialiseMap(){
+  map=L.map("map",{zoomControl:true}).setView([13.53,-15.25],8);
+  baseLayers.street.addTo(map);
+
+  riverLayer.addTo(map);
+  settlementLayer.addTo(map);
+  stationLayer.addTo(map);
+
+  drawSettlements();
+  drawStations();
+  loadRiverGeometry();
+
+  const bounds=L.latLngBounds([
+    [13.20,-16.75],[13.80,-13.85]
+  ]);
+  map.fitBounds(bounds);
+}
+
+document.getElementById("basemap").addEventListener("change",e=>{
+  Object.values(baseLayers).forEach(layer=>{
+    if(map.hasLayer(layer))map.removeLayer(layer);
+  });
+  baseLayers[e.target.value].addTo(map);
+});
+
+/* =========================================================
+   5. SETTLEMENT MARKERS
+========================================================= */
+
+function drawSettlements(){
+  settlementLayer.clearLayers();
+
+  SETTLEMENTS.forEach(place=>{
+    const marker=L.circleMarker([place.lat,place.lon],{
+      radius:5,color:"#fff",weight:1.5,
+      fillColor:"#d88728",fillOpacity:.95
+    });
+
+    marker.bindPopup(`
+      <b>${esc(place.name)}</b><br>
+      Settlement reference location<br>
+      Area: ${esc(place.group)}<br>
+      Approx. coordinates: ${place.lat.toFixed(4)}, ${place.lon.toFixed(4)}
+    `);
+
+    marker.bindTooltip(esc(place.name),{
+      permanent:true,direction:"top",offset:[0,-5],
+      className:"settlement-label"
+    });
+
+    marker.addTo(settlementLayer);
+  });
+}
+
+/* =========================================================
+   6. GLOFAS QUERY LOCATION MARKERS
+========================================================= */
+
+function drawStations(){
+  stationLayer.clearLayers();
+
+  STATIONS.forEach(s=>{
+    const marker=L.circleMarker([s.lat,s.lon],{
+      radius:7,color:"#fff",weight:2,
+      fillColor:s.color,fillOpacity:1
+    });
+
+    marker.bindPopup(`
+      <b>${esc(s.name)} — GloFAS query point</b><br>
+      Approximate API request coordinates<br>
+      ${s.lat.toFixed(4)}, ${s.lon.toFixed(4)}<br>
+      Not a confirmed hydrometric gauge.
+    `);
+
+    marker.bindTooltip(s.name+" • GloFAS",{
+      direction:"right",className:"station-label"
+    });
+
+    marker.addTo(stationLayer);
+  });
+}
+
+/* =========================================================
+   7. RIVER PATH: OPENSTREETMAP
+========================================================= */
+
+/*
+  Retrieve waterway=river features named Gambia within the
+  national river corridor bounding box.
+
+  Overpass returns line geometries. The returned ways are
+  rendered as separate segments because they may not all
+  form one continuous connected geometry.
+*/
+
+const OVERPASS_ENDPOINTS=[
+  "https://overpass-api.de/api/interpreter",
+  "https://overpass.kumi.systems/api/interpreter"
+];
+
+async function requestOSMRiver(){
+  const query=`
+    [out:json][timeout:35];
+    (
+      way["waterway"="river"]["name"~"Gambia",i](12.8,-17.2,14.2,-13.4);
+      relation["waterway"="river"]["name"~"Gambia",i](12.8,-17.2,14.2,-13.4);
+    );
+    out geom;
+  `;
+
+  let lastError=null;
+
+  for(const endpoint of OVERPASS_ENDPOINTS){
+    try{
+      const response=await fetch(endpoint,{
+        method:"POST",
+        headers:{"Content-Type":"application/x-www-form-urlencoded;charset=UTF-8"},
+        body:"data="+encodeURIComponent(query)
+      });
+
+      if(!response.ok)throw new Error("Overpass HTTP "+response.status);
+
+      const data=await response.json();
+      const paths=[];
+
+      (data.elements||[]).forEach(element=>{
+        if(element.type==="way" && Array.isArray(element.geometry)){
+          const coords=element.geometry
+            .filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon))
+            .map(p=>[p.lat,p.lon]);
+
+          if(coords.length>1)paths.push(coords);
+        }
+
+        if(element.type==="relation" && Array.isArray(element.members)){
+          element.members.forEach(member=>{
+            if(member.type==="way" && Array.isArray(member.geometry)){
+              const coords=member.geometry
+                .filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon))
+                .map(p=>[p.lat,p.lon]);
+              if(coords.length>1)paths.push(coords);
+            }
+          });
+        }
+      });
+
+      if(paths.length)return paths;
+      throw new Error("No matching mapped river ways found.");
+    }catch(error){
+      lastError=error;
+    }
+  }
+
+  throw lastError||new Error("River geometry service unavailable.");
+}
+
+/* =========================================================
+   8. FALLBACK RIVER TRACE
+========================================================= */
+
+/*
+  Generalised fallback trace from the eastern river corridor
+  towards the Atlantic outlet. It is illustrative, not a
+  replacement for surveyed hydrographic geometry.
+
+  It is deliberately more detailed than a straight line
+  between the five discharge query locations.
+*/
+
+const FALLBACK_RIVER=[
+  [13.31,-13.95],
+  [13.30,-14.05],
+  [13.31,-14.16],
+  [13.34,-14.24],
+  [13.36,-14.34],
+  [13.39,-14.43],
+  [13.42,-14.52],
+  [13.46,-14.60],
+  [13.50,-14.69],
+  [13.53,-14.77],
+  [13.57,-14.84],
+  [13.63,-14.89],
+  [13.68,-14.93],
+  [13.71,-15.00],
+  [13.72,-15.08],
+  [13.71,-15.16],
+  [13.69,-15.24],
+  [13.66,-15.31],
+  [13.62,-15.39],
+  [13.58,-15.47],
+  [13.54,-15.55],
+  [13.50,-15.63],
+  [13.47,-15.71],
+  [13.44,-15.79],
+  [13.43,-15.87],
+  [13.43,-15.96],
+  [13.44,-16.04],
+  [13.45,-16.12],
+  [13.46,-16.20],
+  [13.46,-16.28],
+  [13.45,-16.36],
+  [13.44,-16.44],
+  [13.44,-16.51],
+  [13.45,-16.57],
+  [13.46,-16.61]
+];
+
+function drawRiver(paths,source){
+  riverLayer.clearLayers();
+  riverPaths=paths;
+
+  paths.forEach((coords,index)=>{
+    /* Static river casing */
+    L.polyline(coords,{
+      color:"#075d83",
+      weight:7,
+      opacity:.9,
+      lineCap:"round",
+      lineJoin:"round"
+    }).addTo(riverLayer);
+
+    /* Bright animated overlay */
+    const animated=L.polyline(coords,{
+      color:"#24c5e0",
+      weight:3.2,
+      opacity:1,
+      dashArray:"11 15",
+      lineCap:"round",
+      lineJoin:"round",
+      className:"river-flow river-glow"
+    }).addTo(riverLayer);
+
+    /* A subtle river highlight */
+    L.polyline(coords,{
+      color:"#b5f2fa",
+      weight:1,
+      opacity:.75,
+      interactive:false
+    }).addTo(riverLayer);
+  });
+
+  document.getElementById("riverSourceLabel").textContent=source;
+  applyRiverAnimation();
+}
+
+async function loadRiverGeometry(){
+  document.getElementById("riverSourceLabel").textContent="Loading mapped river path...";
+
+  try{
+    const paths=await requestOSMRiver();
+    drawRiver(paths,"OpenStreetMap river geometry");
+    setStatus("Mapped river geometry loaded.",100);
+  }catch(error){
+    console.warn("OSM river retrieval failed; fallback used:",error);
+    drawRiver([FALLBACK_RIVER],"Generalised fallback river trace");
+    document.getElementById("riverSourceLabel").textContent=
+      "Generalised fallback river trace";
+  }
+}
+
+/* =========================================================
+   9. LAYER VISIBILITY AND ANIMATION
+========================================================= */
+
+function applyRiverAnimation(){
+  document.querySelectorAll(".river-flow").forEach(path=>{
+    path.style.animationPlayState=
+      riverIsAnimated?"running":"paused";
+  });
+}
+
+document.getElementById("showRiver").addEventListener("change",e=>{
+  riverVisible=e.target.checked;
+  if(riverVisible){
+    if(!map.hasLayer(riverLayer))riverLayer.addTo(map);
+  }else{
+    if(map.hasLayer(riverLayer))map.removeLayer(riverLayer);
+  }
+});
+
+document.getElementById("animateRiver").addEventListener("change",e=>{
+  riverIsAnimated=e.target.checked;
+  applyRiverAnimation();
+});
+
+document.getElementById("showSettlements").addEventListener("change",e=>{
+  if(e.target.checked){
+    if(!map.hasLayer(settlementLayer))settlementLayer.addTo(map);
+  }else if(map.hasLayer(settlementLayer)){
+    map.removeLayer(settlementLayer);
+  }
+});
+
+document.getElementById("showStations").addEventListener("change",e=>{
+  if(e.target.checked){
+    if(!map.hasLayer(stationLayer))stationLayer.addTo(map);
+  }else if(map.hasLayer(stationLayer)){
+    map.removeLayer(stationLayer);
+  }
+});
+
+/* =========================================================
+   10. GLOFAS DATA RETRIEVAL
+========================================================= */
+
+async function fetchOneStation(station,start,end){
+  const params=new URLSearchParams({
+    latitude:String(station.lat),
+    longitude:String(station.lon),
+    daily:"river_discharge",
+    start_date:start,
+    end_date:end,
+    timezone:"GMT",
+    cell_selection:"nearest"
+  });
+
+  const response=await fetch(FLOOD_API+"?"+params.toString());
+
+  if(!response.ok){
+    throw new Error(station.name+" returned HTTP "+response.status);
+  }
+
+  const data=await response.json();
+
+  if(data.error)throw new Error(data.reason||"API error for "+station.name);
+  if(!data.daily||!Array.isArray(data.daily.time)){
+    throw new Error("No daily data for "+station.name);
+  }
+
+  const gridLat=num(data.latitude);
+  const gridLon=num(data.longitude);
+  const elevation=num(data.elevation);
+
+  return data.daily.time.map((date,i)=>({
+    date,
+    station:station.name,
+    discharge_m3s:num(data.daily.river_discharge?.[i]),
+    water_temp_c:null,
+    water_level_m:null,
+    salinity_ppt:null,
+
+    longitude:gridLon,
+    latitude:gridLat,
+    requested_longitude:station.lon,
+    requested_latitude:station.lat,
+    model_grid_latitude:gridLat,
+    model_grid_longitude:gridLon,
+    model_elevation_m:elevation,
+
+    source:"Open-Meteo Global Flood API / Copernicus GloFAS",
+    data_type:"modelled"
+  })).filter(r=>r.discharge_m3s!==null);
+}
+
+async function fetchAllData(){
+  const start=document.getElementById("startDate").value;
+  const end=document.getElementById("endDate").value;
+  const stations=selectedStations();
+
+  if(!start||!end||start>end){
+    alert("Select a valid start and end date.");
+    return;
+  }
+  if(!stations.length){
+    alert("Select at least one GloFAS location.");
+    return;
+  }
+
+  const button=document.getElementById("fetchBtn");
+  button.disabled=true;
+  glofasRecords=[];
+  activeSource="glofas";
+
+  const all=[];
+  const errors=[];
+
+  for(let i=0;i<stations.length;i++){
+    const station=stations[i];
+    setStatus("Retrieving "+station.name+"...",i/stations.length*100);
+
+    try{
+      const rows=await fetchOneStation(station,start,end);
+      all.push(...rows);
+    }catch(error){
+      console.error(error);
+      errors.push(error.message);
+    }
+  }
+
+  glofasRecords=all;
+  button.disabled=false;
+
+  if(!all.length){
+    setStatus("No discharge records retrieved.",100);
+    alert("No GloFAS data were returned.\n\n"+errors.join("\n"));
+    renderDashboard();
+    return;
+  }
+
+  const loaded=[...new Set(all.map(r=>r.station))];
+  setStatus(
+    "Loaded "+all.length.toLocaleString()+" records from "+loaded.length+" location(s).",
+    100
+  );
+
+  if(errors.length){
+    document.getElementById("message").textContent+=
+      " Some locations failed: "+errors.join(" | ");
+  }
+
+  renderDashboard();
+}
+
+document.getElementById("fetchBtn").addEventListener("click",fetchAllData);
+
+/* =========================================================
+   11. CSV UPLOAD
+========================================================= */
+
+document.getElementById("csvFile").addEventListener("change",event=>{
+  const file=event.target.files[0];
+  if(!file)return;
+
+  Papa.parse(file,{
+    header:true,
+    skipEmptyLines:true,
+    complete:result=>{
+      const rows=[];
+      let skipped=0;
+
+      result.data.forEach(raw=>{
+        const date=String(raw.date||"").trim();
+        const discharge=num(raw.discharge_m3s);
+
+        if(!date||Number.isNaN(Date.parse(date))||discharge===null){
+          skipped++;
+          return;
+        }
+
+        rows.push({
+          date:date.slice(0,10),
+          station:String(raw.station||"Uploaded data"),
+          discharge_m3s:discharge,
+          water_temp_c:num(raw.water_temp_c),
+          water_level_m:num(raw.water_level_m),
+          salinity_ppt:num(raw.salinity_ppt),
+          longitude:num(raw.longitude),
+          latitude:num(raw.latitude),
+          requested_longitude:null,
+          requested_latitude:null,
+          model_grid_latitude:null,
+          model_grid_longitude:null,
+          model_elevation_m:null,
+          source:String(raw.source||"User uploaded CSV"),
+          data_type:String(raw.data_type||"observation")
+        });
+      });
+
+      if(!rows.length){
+        alert("No valid rows. Check date and discharge_m3s columns.");
+        return;
+      }
+
+      uploadedRecords=rows;
+      activeSource="uploaded";
+
+      const select=document.getElementById("stationFilter");
+      const known=new Set([...select.options].map(o=>o.value));
+
+      [...new Set(rows.map(r=>r.station))].forEach(name=>{
+        if(!known.has(name)){
+          const option=document.createElement("option");
+          option.value=name;
+          option.textContent=name+" (uploaded)";
+          select.appendChild(option);
+        }
+      });
+
+      select.value="All";
+      setStatus("Uploaded "+rows.length+" CSV records.",100);
+      if(skipped)document.getElementById("message").textContent+=
+        " Skipped "+skipped+" invalid row(s).";
+
+      renderDashboard();
+    },
+    error:error=>alert(error.message)
+  });
+});
+
+/* =========================================================
+   12. ACTIVE DATA AND FILTERS
+========================================================= */
+
+function getActiveRecords(){
+  const source=activeSource==="uploaded"?uploadedRecords:glofasRecords;
+  const station=document.getElementById("stationFilter").value;
+  const start=document.getElementById("startDate").value;
+  const end=document.getElementById("endDate").value;
+
+  return source.filter(r=>{
+    if(station!=="All"&&r.station!==station)return false;
+    if(start&&r.date<start)return false;
+    if(end&&r.date>end)return false;
+    return Number.isFinite(r.discharge_m3s);
+  }).sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+/* =========================================================
+   13. CHART PROCESSING
+========================================================= */
+
+function destroyChart(name){
+  if(charts[name]){
+    charts[name].destroy();
+    charts[name]=null;
+  }
+}
+
+function aggregate(records,period){
+  const groups=new Map();
+
+  records.forEach(r=>{
+    let key=r.date;
+    if(period==="monthly")key=r.date.slice(0,7);
+    if(period==="annual")key=r.date.slice(0,4);
+
+    const id=key+"|"+r.station;
+    if(!groups.has(id)){
+      groups.set(id,{date:key,station:r.station,total:0,count:0});
+    }
+    const g=groups.get(id);
+    g.total+=r.discharge_m3s;
+    g.count++;
+  });
+
+  return [...groups.values()].map(g=>({
+    date:g.date,station:g.station,value:g.total/g.count
+  })).sort((a,b)=>a.date.localeCompare(b.date));
+}
+
+function buildSeries(records){
+  destroyChart("series");
+
+  const period=document.getElementById("aggregation").value;
+  const rows=aggregate(records,period);
+  const dates=[...new Set(rows.map(r=>r.date))].sort();
+  const names=[...new Set(rows.map(r=>r.station))];
+
+  const datasets=names.map(name=>{
+    const station=STATIONS.find(s=>s.name===name);
+    const color=station?.color||"#6b7280";
+    const lookup=new Map(rows.filter(r=>r.station===name).map(r=>[r.date,r.value]));
+
+    return{
+      label:name,
+      data:dates.map(d=>lookup.has(d)?lookup.get(d):null),
+      borderColor:color,backgroundColor:color,
+      borderWidth:2,pointRadius:period==="daily"?0:2,
+      tension:.25,spanGaps:false
+    };
+  });
+
+  charts.series=new Chart(document.getElementById("seriesChart"),{
+    type:"line",
+    data:{labels:dates,datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:"index",intersect:false},
+      plugins:{legend:{position:"bottom",labels:{boxWidth:9,font:{size:9}}}},
+      scales:{
+        x:{ticks:{maxTicksLimit:8,font:{size:9}}},
+        y:{beginAtZero:true,title:{display:true,text:"Discharge (m³/s)"},ticks:{font:{size:9}}}
+      }
+    }
+  });
+}
+
+function buildSeason(records){
+  destroyChart("season");
+  const stats=Array.from({length:12},()=>({sum:0,count:0}));
+
+  records.forEach(r=>{
+    const m=Number(r.date.slice(5,7))-1;
+    if(m>=0&&m<12){
+      stats[m].sum+=r.discharge_m3s;
+      stats[m].count++;
+    }
+  });
+
+  charts.season=new Chart(document.getElementById("seasonChart"),{
+    type:"bar",
+    data:{
+      labels:MONTHS,
+      datasets:[{
+        label:"Mean discharge",
+        data:stats.map(s=>s.count?s.sum/s.count:null),
+        backgroundColor:"#13a8c7",borderRadius:4
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{ticks:{font:{size:9}}},y:{beginAtZero:true}}
+    }
+  });
+}
+
+function buildStationComparison(records){
+  destroyChart("station");
+
+  const names=STATIONS.map(s=>s.name);
+  const means=names.map(name=>{
+    const rows=records.filter(r=>r.station===name);
+    return rows.length?
+      rows.reduce((sum,r)=>sum+r.discharge_m3s,0)/rows.length:null;
+  });
+
+  charts.station=new Chart(document.getElementById("stationChart"),{
+    type:"bar",
+    data:{
+      labels:names,
+      datasets:[{
+        label:"Mean discharge (m³/s)",
+        data:means,
+        backgroundColor:STATIONS.map(s=>s.color),
+        borderRadius:4
+      }]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{x:{ticks:{font:{size:9}}},y:{beginAtZero:true}}
+    }
+  });
+}
+
+/* =========================================================
+   14. KPIs AND TABLE
+========================================================= */
+
+function updateKPIs(records){
+  const values=records.map(r=>r.discharge_m3s).filter(Number.isFinite);
+
+  if(!values.length){
+    ["kLatest","kMean","kMax"].forEach(id=>{
+      document.getElementById(id).textContent="—";
+    });
+    document.getElementById("kRecords").textContent="0";
+    return;
+  }
+
+  const latest=[...records].sort((a,b)=>b.date.localeCompare(a.date))[0];
+  const mean=values.reduce((a,b)=>a+b,0)/values.length;
+
+  document.getElementById("kLatest").textContent=fmt(latest.discharge_m3s);
+  document.getElementById("kMean").textContent=fmt(mean);
+  document.getElementById("kMax").textContent=fmt(Math.max(...values));
+  document.getElementById("kRecords").textContent=values.length.toLocaleString();
+}
+
+function updateTable(records){
+  const body=document.getElementById("recordsTable");
+  const rows=[...records].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,15);
+
+  if(!rows.length){
+    body.innerHTML='<tr><td colspan="4">No records available.</td></tr>';
+    return;
+  }
+
+  body.innerHTML=rows.map(r=>`
+    <tr>
+      <td>${esc(r.date)}</td>
+      <td>${esc(r.station)}</td>
+      <td>${fmt(r.discharge_m3s)}</td>
+      <td>${esc(r.data_type||"modelled")}</td>
+    </tr>
+  `).join("");
+}
+
+function renderDashboard(){
+  const records=getActiveRecords();
+  updateKPIs(records);
+  updateTable(records);
+  buildSeries(records);
+  buildSeason(records);
+  buildStationComparison(records);
+}
+
+/* =========================================================
+   15. CSV EXPORT
+========================================================= */
+
+const CSV_FIELDS=[
+  "date","station","discharge_m3s",
+  "water_temp_c","water_level_m","salinity_ppt",
+  "longitude","latitude",
+  "requested_longitude","requested_latitude",
+  "model_grid_latitude","model_grid_longitude",
+  "model_elevation_m","source","data_type"
+];
+
+function exportCSV(rows,filename){
+  if(!rows.length){
+    alert("No records to export.");
+    return;
+  }
+
+  const csv=Papa.unparse({
+    fields:CSV_FIELDS,
+    data:rows.map(r=>CSV_FIELDS.map(k=>r[k]??""))
+  });
+
+  const blob=new Blob(["\uFEFF"+csv],{type:"text/csv;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;a.download=filename;
+  document.body.appendChild(a);a.click();a.remove();
+  URL.revokeObjectURL(url);
+}
+
+document.getElementById("exportBtn").addEventListener("click",()=>{
+  exportCSV(getActiveRecords(),"Gambia_River_Pulse_Data.csv");
+});
+
+document.getElementById("templateBtn").addEventListener("click",()=>{
+  exportCSV([{
+    date:"2025-01-01",station:"Example station",
+    discharge_m3s:100,water_temp_c:"",
+    water_level_m:"",salinity_ppt:"",
+    longitude:"",latitude:"",
+    requested_longitude:"",requested_latitude:"",
+    model_grid_latitude:"",model_grid_longitude:"",
+    model_elevation_m:"",source:"Example source",
+    data_type:"observation"
+  }],"Gambia_River_Pulse_Template.csv");
+});
+
+/* =========================================================
+   16. FILTER EVENTS
+========================================================= */
+
+["stationFilter","aggregation","startDate","endDate"].forEach(id=>{
+  document.getElementById(id).addEventListener("change",renderDashboard);
+});
+
+document.getElementById("stationList").addEventListener("change",e=>{
+  if(!e.target.matches("[data-station]"))return;
+
+  const selected=selectedStations().map(s=>s.name);
+  STATIONS.forEach(s=>{
+    const markerFound=stationLayer.getLayers().find(layer=>{
+      const ll=layer.getLatLng?.();
+      return ll&&Math.abs(ll.lat-s.lat)<.00001&&Math.abs(ll.lng-s.lon)<.00001;
+    });
+
+    /* The station layer is rebuilt to reflect the checkbox selection. */
+  });
+
+  stationLayer.clearLayers();
+  STATIONS.filter(s=>selected.includes(s.name)).forEach(s=>{
+    const marker=L.circleMarker([s.lat,s.lon],{
+      radius:7,color:"#fff",weight:2,fillColor:s.color,fillOpacity:1
+    }).bindPopup(
+      "<b>"+esc(s.name)+" — GloFAS query point</b><br>Approximate query coordinates; not a verified gauge."
+    ).bindTooltip(s.name+" • GloFAS",{className:"station-label"});
+    marker.addTo(stationLayer);
+  });
+});
+
+/* =========================================================
+   17. RESET
+========================================================= */
+
+document.getElementById("resetBtn").addEventListener("click",()=>{
+  document.querySelectorAll("[data-station]").forEach(el=>el.checked=true);
+
+  document.getElementById("startDate").value="2020-01-01";
+  document.getElementById("endDate").value=isoDate(yesterday);
+  document.getElementById("stationFilter").value="All";
+  document.getElementById("aggregation").value="monthly";
+  document.getElementById("basemap").value="street";
+
+  document.getElementById("showRiver").checked=true;
+  document.getElementById("animateRiver").checked=true;
+  document.getElementById("showSettlements").checked=true;
+  document.getElementById("showStations").checked=true;
+
+  riverIsAnimated=true;
+  riverVisible=true;
+
+  Object.values(baseLayers).forEach(layer=>{
+    if(map.hasLayer(layer))map.removeLayer(layer);
+  });
+  baseLayers.street.addTo(map);
+
+  [riverLayer,settlementLayer,stationLayer].forEach(layer=>{
+    if(!map.hasLayer(layer))layer.addTo(map);
+  });
+
+  uploadedRecords=[];
+  activeSource="glofas";
+  document.getElementById("csvFile").value="";
+
+  const select=document.getElementById("stationFilter");
+  [...select.options].forEach(o=>{
+    if(o.value!=="All"&&!STATIONS.some(s=>s.name===o.value))o.remove();
+  });
+
+  drawStations();
+  drawSettlements();
+  applyRiverAnimation();
+
+  map.fitBounds([[13.20,-16.75],[13.80,-13.85]]);
+  renderDashboard();
+  setStatus("Dashboard reset.",0);
+});
+
+/* =========================================================
+   18. START APPLICATION
+========================================================= */
+
+buildControls();
+initialiseMap();
+renderDashboard();
+
+/* Retrieve model discharge when the page opens. */
+fetchAllData();
+
+</script>
+</body>
+</html>
